@@ -11,7 +11,7 @@ from .output import outputFormatter
 from .classify import geneClassifier
 
 class piplineCommand(baseCommand):
-    name = "pipline"
+    name = "pipeline"
     description = "Run the whole pipline of BGC-Prophet"
 
     def add_arguments(self, parser):
