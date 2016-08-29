@@ -2,7 +2,7 @@
 
 BGC-Prophet, a deep learning approach that leverages language processing neural networkmodel to accurately identify known BGCs and extrapolate novel ones. 
 
-![figure1](images/figure1.png?raw=true "figure1")
+![Figure1](images/Figure1.svg?raw=true "Figure1")
 
 
 ## Installation
@@ -31,7 +31,7 @@ BGC-Prophet can detect and classify BGCs in server genomic sequence. The process
 
 
 ```shell
-bgc_prophet pipline --genomesDir ./pathtogenomesdir/ --modelPath ./pathto/annotator.pt --saveIntermediate --name nameoftask --threshold 0.03 --max_gap 3 --min_count 2 --classifierPath ./pathto/classifier.pt  --classify_t 0.5
+bgc_prophet pipeline --genomesDir ./pathtogenomesdir/ --modelPath ./pathto/annotator.pt --saveIntermediate --name nameoftask --threshold 0.03 --max_gap 3 --min_count 2 --classifierPath ./pathto/classifier.pt  --classify_t 0.5
  
 ```
 
@@ -43,7 +43,7 @@ use `bgc_prophet pipline --help` command for more help
 You can download trained models from Github releases page:
 
 ```shell
-wget 
+wget https://github.com/HUST-NingKang-Lab/BGC-Prophet/files/12733164/model.tar.gz
 ```
 
 `annoator.pt` model is used to dectct BGC genes, and `classifier.pt` model is used to classify BGCs.
@@ -92,7 +92,7 @@ Merge genes within a distance of 'max_gap' to form a single BGC, and filter out 
 
 ```shell
 bgc_prophet output --datasetPath ./output/split.csv \
---outputPath ./output/ --loadIntermediate ./output/intermediate_rediction.npy \
+--outputPath ./output/ --loadIntermediate ./output/intermediate_prediction.npy \
 --name output --threshold 0.03 --max_gap 3 --min_count 2
 ```
 
@@ -104,7 +104,7 @@ Apply a trained classifier to categorize the detected BGCs.
 
 ```shell
 bgc_prophet classify --datasetPath ./prediction.csv \
---classifierPath ./transformerClassifier_100.pt \
+--classifierPath ./pathto/classifier.pt \
 --outputPath ./output/ --lmdbPath ./lmdb_genomes \
 --name classify --device cuda 
 ```
@@ -113,7 +113,7 @@ The finall output will be save as a csv file, containing dection and classificat
 
 ## Publications
 
-...
+Deciphering the Biosynthetic Potential of Microbial Genomes Using a BGC Language Processing Neural Network Model [[bioRxiv]](https://doi.org/10.1101/2023.11.30.569352)
 
 ## Maintainer
 
