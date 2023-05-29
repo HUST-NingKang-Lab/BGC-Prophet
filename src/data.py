@@ -72,10 +72,10 @@ class BGCLabelsDataset(Dataset):
 
     def __len__(self):
         if self.mode == 'train':
-            print("length of training dataset",len(self.data.train))
+            # print("length of training dataset",len(self.data.train))
             return len(self.data.train)
         elif self.mode == 'test':
-            print("length of testing dataset",len(self.data.test))
+            # print("length of testing dataset",len(self.data.test))
             return len(self.data.test)
         elif self.mode == 'eval':
             return len(self.data)
