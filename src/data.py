@@ -93,7 +93,7 @@ class BGCLabelsDataset(Dataset):
             raise ValueError("No such mode: {}!".format(self.mode))
         
         sentence, labels_onehot, TDlabels = self.data[index]
-        sentence_embedding = [pickle.loads(self.txn.get(str(word).encode('ascii'))['mean_representations'][6]) for word in sentence]
+        sentence_embedding = [pickle.loads(self.txn.get(str(word).encode('ascii')))['mean_representations'][6] for word in sentence]
         sentence_embedding = torch.stack(sentence_embedding)
         labels_onehot = np.array(labels_onehot)
         TDlabels = np.array(TDlabels)
