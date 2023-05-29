@@ -92,7 +92,7 @@ class BGCLabelsDataset(Dataset):
             raise ValueError("No such mode: {}!".format(self.mode))
         
         sentence, labels_onehot, TDlabels = self.data[index]
-        sentence_embedding = [self.txn.get(str(word).decode('ascii')['mean_representations'][6]) for word in sentence]
+        sentence_embedding = [self.txn.get(str(word).encode('ascii')['mean_representations'][6]) for word in sentence]
         sentence_embedding = torch.stack(sentence_embedding)
         labels_onehot = np.array(labels_onehot)
         TDlabels = np.array(TDlabels)
@@ -103,7 +103,7 @@ class BGCLabelsDataset(Dataset):
     
     def __del__(self):
         self.env.close()
-        super().__del__()
+        # super().__del__()
         # print('env closed')
 
 
