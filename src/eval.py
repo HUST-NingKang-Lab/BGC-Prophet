@@ -23,6 +23,7 @@ class transformerEncoderTDeval:
         self.model = model
         self.loss = loss
 
+        self.lmdbPath = args.lmdbPath
         self.batch_size = args.batch_size
         self.save_dir = args.save_dir
         self.transformerEncoderPath = args.transformerEncoderPath
@@ -32,7 +33,7 @@ class transformerEncoderTDeval:
         
         # self.model = torch.load(self.lstmPath)
         self.model = model
-        self.dataset = BGCLabelsDataset(data, mode='eval')
+        self.dataset = BGCLabelsDataset(data, lmdbPath=self.lmdbPath, mode='eval')
         self.dataLoader = DataLoader(dataset=self.dataset, batch_size=self.batch_size, shuffle=False, num_workers=5)
 
         self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -134,7 +135,7 @@ if __name__=='__main__':
     print('--------args----------\n')
 
     writer = SummaryWriter('./log/TransformerEncoder/')
-    data = DataReader(args.modelPath, args.datasetPath, args.max_len, left_padding=args.left_padding)
+    data = DataReader(args.datasetPath, args.max_len)
     embedding_dim = data.embedding_dim
     # model = LSTMTimeDistributedNet(embedding_dim, args.hidden_dim, num_layers=args.num_layers, max_len=args.max_len, labels_num=args.labels_num, dropout=args.dropout)
     model = torch.load(args.transformerEncoderPath)
