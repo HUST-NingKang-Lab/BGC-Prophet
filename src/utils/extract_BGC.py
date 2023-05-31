@@ -118,8 +118,8 @@ def run(args):
                 contacts = out["contacts"].to(device="cpu")
 
             for i, label in enumerate(labels):
-                args.output_file = args.output_dir / f"{label}.pt"
-                args.output_file.parent.mkdir(parents=True, exist_ok=True)
+                # args.output_file = args.output_dir / f"{label}.pt"
+                # args.output_file.parent.mkdir(parents=True, exist_ok=True)
                 result = {"label": label}
                 truncate_len = min(args.truncation_seq_length, len(strs[i]))
                 # Call clone on tensors to ensure tensors are not views into a larger representation
