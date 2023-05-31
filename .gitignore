@@ -1,2 +1,6 @@
 data/geno2geneseq.csv
 data/BGC_labels_dataset.csv
+./resultSave/*
+./modelSave/*
+./log/*
+./src/__pycache/*
