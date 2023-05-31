@@ -7,3 +7,4 @@ src/__pycache__/*
 lmdb_val
 lmdb_BGC
 *.out
+data/BGC_train_dataset_plus.csv
