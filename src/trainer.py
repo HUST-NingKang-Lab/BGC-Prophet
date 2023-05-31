@@ -8,6 +8,7 @@ import os
 import pickle
 import numpy as np
 import random
+from timm.scheduler.cosine_lr import CosineLRScheduler
 
 from data import DataReader, BGCLabelsDataset
 from loss import trainLoss
@@ -26,6 +27,7 @@ class TransformerEncoderTrainer:
         self.batch_size = args.batch_size
         self.interval = args.interval
         self.ditribute_epochs = args.distribute_epochs
+        self.warmup_epochs = args.warmup_epochs
         self.save_dir = args.save_dir
         self.learning_rate = args.learning_rate
         # self.savePath = args.save_dir
@@ -131,7 +133,13 @@ class TransformerEncoderTrainer:
 
         # self.optimizer = optim.Adam(model.parameters(), lr=self.learning_rate)
         self.optimizer = optim.AdamW(model.parameters(), lr=self.learning_rate, weight_decay=0.01)
-        self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=0.95, last_epoch=-1, verbose=True)  
+        self.scheduler = CosineLRScheduler(optimizer=self.optimizer,
+                                                            t_initial=self.ditribute_epochs,
+                                                            lr_min=1e-5,
+                                                            warmup_t=self.warmup_epochs,
+                                                            warmup_lr_init=1e-4
+                                                            )
+        # self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=0.95, last_epoch=-1, verbose=True)  
 
         for epoch in range(self.ditribute_epochs):
             self.train_total_TD_acc = 0
@@ -140,8 +148,8 @@ class TransformerEncoderTrainer:
             # tensorboard train
             self.writer.add_scalar('Loss/trainTDLoss', self.train_total_TD_loss, epoch)
             self.writer.add_scalar('Acc/trainTDAcc', self.train_total_TD_acc, epoch)
-            if epoch>=5 and self.scheduler.get_last_lr()[0]>0.0005:
-                self.scheduler.step()
+            # if epoch>=5 and self.scheduler.get_last_lr()[0]>0.0005:
+            self.scheduler.step(epoch)
             # print(f'Train Set: lloss:{self.train_total_label_loss}, lacc: {self.train_total_label_acc}')
             print(f'Train Set: tdloss:{self.train_total_TD_loss}, tdacc: {self.train_total_TD_acc}')
             self.test_total_TD_loss = 0
@@ -177,6 +185,7 @@ if __name__=='__main__':
     parser.add_argument('--learning_rate', required=True, type=float)
     parser.add_argument('--interval', required=False, default=10, type=int)
     parser.add_argument('--distribute_epochs', required=True, type=int)
+    parser.add_argument('--warmup_epochs', default=200, type=int)
     parser.add_argument('--save_dir', default='./modelSave/')
     parser.add_argument('--load_label_model', action='store_true', required=False)
     parser.add_argument('--label_model_path', required=False)
