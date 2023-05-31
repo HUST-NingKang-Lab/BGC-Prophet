@@ -91,7 +91,7 @@ def run(args):
 
     args.lmdb_path.mkdir(parents=True, exist_ok=True)
     # args.output_dir.mkdir(parents=True, exist_ok=True)
-    lmdb_path = args.lmdb_path
+    lmdb_path = str(args.lmdb_path)
     map_size = 307374182400
     env = lmdb.open(lmdb_path, subdir=True, map_size=map_size, readonly=False, meminit=False, map_async=True)
     return_contacts = "contacts" in args.include
