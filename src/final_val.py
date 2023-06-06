@@ -98,6 +98,7 @@ class final_validation:
         plt.title(f'{x} ROC')
         plt.legend(loc="lower right")
         file_path = self.outpath + f'_{x}_ROC.png'
+        print("AUC:%0.3f"% roc_auc)
         plt.savefig(file_path, dpi=300)
 
     def plot_two(self):

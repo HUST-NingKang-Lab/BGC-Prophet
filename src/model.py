@@ -11,7 +11,7 @@ from batch3Linear import batch3Linear
 
 class transformerEncoderNet(nn.Module):
     def __init__(self, d_model: int=512, nhead: int=8, num_encoder_layers: int=6, max_len: int=128, 
-                 dim_feedforward: int=2048, dropout: float=0.1, labels_num: int=8, 
+                 dim_feedforward: int=2048, transformer_dropout: float=0.1, mlp_dropout: float=0.5, 
                  activation: Union[str, Callable[[Tensor], Tensor]]=F.gelu,
                 #  custom_encoder: Optional[Any]=None,
                  layer_norm_eps: float=1e-05, batch_first: bool=True, norm_first: bool=True,
@@ -20,21 +20,21 @@ class transformerEncoderNet(nn.Module):
         factory_kwargs = {'device':device, 'dtype':dtype}
         self.pos_encoder = PositionalEncoding(num_hiddens=d_model)
         encoder_layer = nn.TransformerEncoderLayer(d_model, nhead, dim_feedforward, 
-                                                   dropout, activation, layer_norm_eps, batch_first, norm_first,
+                                                   transformer_dropout, activation, layer_norm_eps, batch_first, norm_first,
                                                    **factory_kwargs)
         encoder_norm = nn.LayerNorm(d_model, eps=layer_norm_eps, **factory_kwargs)
         self.encoder = nn.TransformerEncoder(encoder_layer, num_encoder_layers, encoder_norm)
 
-        self.TDOut = FeatLayer(max_len, d_model, 1)
-        # self.out = nn.Sequential(
-        #     nn.Dropout(dropout),
-        #     nn.Linear(in_features=d_model, out_features=128),
-        #     nn.GELU(),
-        #     nn.Linear(in_features=128, out_features=32),
-        #     nn.GELU(),
-        #     nn.Linear(in_features=32, out_features=1),
-        #     nn.Sigmoid()
-        # )
+        # self.TDOut = FeatLayer(max_len, d_model, 1)
+        self.out = nn.Sequential(
+            nn.Dropout(mlp_dropout),
+            nn.Linear(in_features=d_model, out_features=128),
+            nn.GELU(),
+            nn.Linear(in_features=128, out_features=32),
+            nn.GELU(),
+            nn.Linear(in_features=32, out_features=1),
+            nn.Sigmoid()
+        )
 
 
         self._reset_parameters()
@@ -48,10 +48,10 @@ class transformerEncoderNet(nn.Module):
         src = self.pos_encoder(src)
         memory = self.encoder(src, mask=None, src_key_padding_mask=None)
 
-        memory_reshaped = memory.reshape(memory.shape[1], memory.shape[0], -1)
-        TD = self.TDOut(memory_reshaped)
-        TD = TD.reshape(memory.shape[0], memory.shape[1], -1).squeeze(-1)
-        # TD = self.out(memory).squeeze(-1)
+        # memory_reshaped = memory.reshape(memory.shape[1], memory.shape[0], -1)
+        # TD = self.TDOut(memory_reshaped)
+        # TD = TD.reshape(memory.shape[0], memory.shape[1], -1).squeeze(-1)
+        TD = self.out(memory).squeeze(-1)
         return TD
     
     def _reset_parameters(self):
