@@ -7,9 +7,19 @@ source ~/anaconda3/etc/profile.d/conda.sh
 # source /mnt/hdd0/qllai/miniconda3/etc/profile.d/conda.sh
 conda activate pt
 
+max_len=128
+nhead=5
+seed=42
+num_encoder_layers=2
+transformer_dropout=0.1
+mlp_dropout=0.1
+batch_size=32
+learning_rate=0.0005
+distribute_epochs=200
+warmup_epochs=0
 
-nohup python -u ./src/trainer.py --datasetPath ./data/BGC_train_dataset_plus.csv \
-    --max_len 128 --nhead 4 --seed 42 --num_encoder_layers 6 --dropout 0.2 \
-    --batch_size 64 --learning_rate 0.002 \
-    --distribute_epochs 1000 --warmup_epochs 30 --lmdbPath ./lmdb_BGC \
-    >nohup_transformerEncoder_BGC.out &
+nohup python -u ./src/trainer.py --datasetPath ./data/BGC_train_dataset_inbalence.csv \
+    --max_len $max_len --nhead $nhead --seed $seed --num_encoder_layers $num_encoder_layers --transformer_dropout $transformer_dropout \
+    --batch_size $batch_size --learning_rate $learning_rate --mlp_dropout $mlp_dropout \
+    --distribute_epochs $distribute_epochs --warmup_epochs $warmup_epochs --lmdbPath ./lmdb_BGC \
+    >./nohup/transformerEncoder_BGC_loss$max_len$nhead$seed$num_encoder_layers$transformer_dropout$mlp_dropout$batch_size$learning_rate$distribute_epochs$warmup_epochs.out &

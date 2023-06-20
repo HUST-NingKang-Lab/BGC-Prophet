@@ -9,7 +9,7 @@ conda activate pt
 
 nohup python -u src/eval.py --lmdbPath ./lmdb_val/ \
     --datasetPath ./data/Nine_genomes_test_dataset.csv --max_len 128 \
-    --nhead 4 --num_encoder_layers 4 --dropout 0.4 --batch_size 64 \
-    --transformerEncoderPath ./modelSave/transformerEncoder_TD/bS_64_dE_200_lR_0.0005_mL_128_d_320_nH_5_nEL_8_dP_0.5_alpha_0.95_gamma_2.0_TD/transformerEncoder_Model_TD_70.pt \
-    --name NineGenomes_128_test_no_insert_shared \
-    >eval_transformerEncoder_shared_BGC_9_test.out &
+    --nhead 4 --num_encoder_layers 2 --dropout 0.4 --batch_size 64 \
+    --transformerEncoderPath ./modelSave/transformerEncoder_TD_focal/bS_64_dE_200_lR_0.0005_mL_128_d_320_nH_5_nEL_2_tdP_0.1_mdP_0.1_alpha_0.1_gamma_1.0_TD/transformerEncoder_Model_TD_28.pt \
+    --name NineGenomes_128_test_28 \
+    >eval_transformerEncoder_shared_BGC_9_test_28.out &

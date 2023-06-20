@@ -46,7 +46,7 @@ class TransformerEncoderTrainer:
         self.model.to(self.device)
         
         self.save_path = self.save_dir + \
-        f'transformerEncoder_TD/bS_{self.batch_size}_dE_{self.ditribute_epochs}_lR_{self.learning_rate}_mL_{args.max_len}_d_{self.d_model}_nH_{args.nhead}_nEL_{args.num_encoder_layers}_tdP_{args.transformer_dropout}_mdP_{args.mlp_dropout}_alpha_{args.alpha}_gamma_{args.gamma}_TD/'
+        f'transformerEncoder_TD_focal/bS_{self.batch_size}_dE_{self.ditribute_epochs}_lR_{self.learning_rate}_mL_{args.max_len}_d_{self.d_model}_nH_{args.nhead}_nEL_{args.num_encoder_layers}_tdP_{args.transformer_dropout}_mdP_{args.mlp_dropout}_alpha_{args.alpha}_gamma_{args.gamma}_TD/'
         os.makedirs(self.save_path, exist_ok=True)
         # with open(self.save_path+'labels_list.pkl', 'wb') as fp:
         #     pickle.dump(self.data.labels_list, fp)
@@ -219,7 +219,7 @@ if __name__=='__main__':
     total = sum(p.numel() for p in model.parameters())
     trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
     print(f'Total Parameters: {total}\nTrainable Parameters: {trainable}\n')
-    TimeDistributedLoss = FocalLoss(alpha=0.05, gamma=1, reduction='sum')
+    TimeDistributedLoss = FocalLoss(alpha=args.alpha, gamma=args.gamma, reduction='sum')
     # optimizer = optim.Adam(model.parameters(), lr=args.learning_rate)
     # scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.95, last_epoch=-1, verbose=True)  
     trainer = TransformerEncoderTrainer(args=args, writer=writer,data=data, model=model, TimeDistributedLoss=TimeDistributedLoss)

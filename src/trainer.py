@@ -14,6 +14,7 @@ from data import DataReader, BGCLabelsDataset
 from loss import trainLoss
 from utils import evaluate
 from model import transformerEncoderNet
+# from lstm_model import LSTMNet
 
 
 
@@ -46,7 +47,7 @@ class TransformerEncoderTrainer:
         self.model.to(self.device)
         
         self.save_path = self.save_dir + \
-        f'transformerEncoder_TD/bS_{self.batch_size}_dE_{self.ditribute_epochs}_lR_{self.learning_rate}_mL_{args.max_len}_d_{self.d_model}_nH_{args.nhead}_nEL_{args.num_encoder_layers}_dP_{args.dropout}_TD/'
+        f'transformerEncoder_TD_loss/bS_{self.batch_size}_dE_{self.ditribute_epochs}_lR_{self.learning_rate}_mL_{args.max_len}_d_{self.d_model}_nH_{args.nhead}_nEL_{args.num_encoder_layers}_tdP_{args.transformer_dropout}_mdP_{args.mlp_dropout}_TD/'
         os.makedirs(self.save_path, exist_ok=True)
         # with open(self.save_path+'labels_list.pkl', 'wb') as fp:
         #     pickle.dump(self.data.labels_list, fp)
@@ -133,13 +134,13 @@ class TransformerEncoderTrainer:
 
         # self.optimizer = optim.Adam(model.parameters(), lr=self.learning_rate)
         self.optimizer = optim.AdamW(model.parameters(), lr=self.learning_rate, weight_decay=0.01)
-        self.scheduler = CosineLRScheduler(optimizer=self.optimizer,
-                                                            t_initial=self.ditribute_epochs,
-                                                            lr_min=1e-5,
-                                                            warmup_t=self.warmup_epochs,
-                                                            warmup_lr_init=1e-4
-                                                            )
-        # self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=0.95, last_epoch=-1, verbose=True)  
+        # self.scheduler = CosineLRScheduler(optimizer=self.optimizer,
+        #                                                     t_initial=self.ditribute_epochs,
+        #                                                     lr_min=1e-5,
+        #                                                     warmup_t=self.warmup_epochs,
+        #                                                     warmup_lr_init=1e-4
+        #                                                     )
+        self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=0.95, last_epoch=-1, verbose=True)  
 
         for epoch in range(self.ditribute_epochs):
             self.train_total_TD_acc = 0
@@ -148,8 +149,8 @@ class TransformerEncoderTrainer:
             # tensorboard train
             self.writer.add_scalar('Loss/trainTDLoss', self.train_total_TD_loss, epoch)
             self.writer.add_scalar('Acc/trainTDAcc', self.train_total_TD_acc, epoch)
-            # if epoch>=5 and self.scheduler.get_last_lr()[0]>0.0005:
-            self.scheduler.step(epoch)
+            if epoch>=5 and self.scheduler.get_last_lr()[0]>5e-6:
+                self.scheduler.step()
             # print(f'Train Set: lloss:{self.train_total_label_loss}, lacc: {self.train_total_label_acc}')
             print(f'Train Set: tdloss:{self.train_total_TD_loss}, tdacc: {self.train_total_TD_acc}')
             self.test_total_TD_loss = 0
@@ -180,7 +181,8 @@ if __name__=='__main__':
     # parser.add_argument('--hidden_dim', required=True, type=int)
     parser.add_argument('--nhead', type=int, required=True)
     parser.add_argument('--num_encoder_layers', required=True, default=4, type=int)
-    parser.add_argument('--dropout', default=0.1, type=float)
+    parser.add_argument('--transformer_dropout', default=0.1, type=float)
+    parser.add_argument('--mlp_dropout', default=0.5, type=float)
     parser.add_argument('--batch_size', required=True, type=int)
     parser.add_argument('--learning_rate', required=True, type=float)
     parser.add_argument('--interval', required=False, default=10, type=int)
@@ -207,8 +209,9 @@ if __name__=='__main__':
     if args.load_label_model:
         model = torch.load(args.label_model_path)
     else:
+        # model = LSTMNet(embedding_dim=embedding_dim, hidden_dim=embedding_dim, num_layers=args.num_encoder_layers, dropout=args.transformer_dropout)
         model = transformerEncoderNet(d_model=embedding_dim, nhead=args.nhead, num_encoder_layers=args.num_encoder_layers, max_len=args.max_len, 
-                                      dim_feedforward=embedding_dim*4, dropout=args.dropout, labels_num=data.labels_num, batch_first=True)
+                                      dim_feedforward=embedding_dim*4, transformer_dropout=args.transformer_dropout, mlp_dropout=args.mlp_dropout, batch_first=True)
         # model = transformerEncoderNet(embedding_dim=embedding_dim, hidden_dim=args.hidden_dim, num_layers=args.num_layers, max_len=args.max_len, labels_num=data.labels_num, dropout=args.dropout)
     if args.two_gpu:
         model = torch.nn.DataParallel(model)
