@@ -204,7 +204,7 @@ if __name__=='__main__':
     
     setup_seed(args.seed)
     writer = SummaryWriter('./log/TransformerEncoder/')
-    data = DataReader(args.datasetPath, args.max_len, test_ratio=0.2)
+    data = DataReader(args.datasetPath, test_ratio=0.2)
     embedding_dim = 320
     if args.load_label_model:
         model = torch.load(args.label_model_path)

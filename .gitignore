@@ -8,3 +8,13 @@ lmdb_val
 lmdb_BGC
 *.out
 data/BGC_train_dataset_plus.csv
+lmdb_train_dataset.tar.gz
+data/BGC_train_dataset_aug.csv
+data/BGC_train_dataset_inbalence.csv
+lmdb_BGC_only/data.mdb
+lmdb_BGC_only/lock.mdb
+lmdb_train/data.mdb
+lmdb_train/lock.mdb
+modelSavetransformerClassifier/*
+output/Aspergillus.csv
+

@@ -9,9 +9,8 @@ import pickle
 
 class DataReader:
 
-    def __init__(self, datasetPath, max_len, test_ratio = 0.2) -> None:
+    def __init__(self, datasetPath, test_ratio = 0.2) -> None:
         self.datasetPath = datasetPath
-        self.max_len = max_len
         self.test_ratio = test_ratio
         self.embedding_dim = 320
         self.__getData()
@@ -92,12 +91,14 @@ class BGCLabelsDataset(Dataset):
         else:
             raise ValueError("No such mode: {}!".format(self.mode))
         
+        # print(index)
         sentence, labels_onehot, TDlabels = self.data[index]
         sentence_embedding = [pickle.loads(self.txn.get(str(word).encode('ascii')))['mean_representations'][6] for word in sentence]
+        # print(sentence_embedding)
         sentence_embedding = torch.stack(sentence_embedding)
         labels_onehot = np.array(labels_onehot)
         TDlabels = np.array(TDlabels)
-        assert sentence_embedding.shape[0]==len(TDlabels), f'{idx} sample: length of sentence: {len(sentence_embedding)}, length of labels: {len(TDlabels)}'
+        # assert sentence_embedding.shape[0]==len(TDlabels), f'{idx} sample: length of sentence: {len(sentence_embedding)}, length of labels: {len(TDlabels)}'
         # print(index, self.data.df.iloc[index], sentence_embedding.shape, labels_onehot.shape, TDlabels.shape)
         return sentence_embedding, torch.tensor(labels_onehot, dtype=torch.float32), torch.tensor(TDlabels, dtype=torch.float32)
     

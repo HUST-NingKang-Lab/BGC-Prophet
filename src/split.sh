@@ -1,0 +1,1 @@
+python -u split.py --genomesPath /data4/yaoshuai/Aspergillus/geno2geneseq.csv --outputPath ../output/ --name Aspergillus --threads 40
