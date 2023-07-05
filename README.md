@@ -31,32 +31,46 @@ You can download trained models from Github releases page:
 wget 
 ```
 
-##### Preprocess
+### Preprocess
+
+organize some genome into a csv file.
 
 ```shell
-BGC-Prophet ./folder/
+BGC-Prophet preprocess ./folder/
 ```
 
 
-##### Get Embedding
+### Get Embedding
+
+We use ESM2-8M model to get genes' embedding vector, and the last layer output of the model is selected as the final word embedding vector for the sequences. You can use the following command:
+
+```shell
+
+BGC-Prophet embed xxx.fasta
+
+```
 
 
 
-##### Split Sequences
+### Split Sequences
+
+Split the genome into gene sequences of length 128.
+```shell
+BGC-Prophet split --genomesPath ./genomes.csv --outputPath ./output/ --name split -threads 10
+```
+
+
+### Gene Prediction
 
 
 
-##### Gene Prediction
+### Biosynthetic Classification
 
 
 
-##### Biosynthetic Classification
+## Training and evaluating
 
 
 
-#### Training and evaluating
-
-
-
-###### training dataset
+### training dataset
 
