@@ -16,5 +16,9 @@ lmdb_BGC_only/lock.mdb
 lmdb_train/data.mdb
 lmdb_train/lock.mdb
 modelSavetransformerClassifier/*
-output/Aspergillus.csv
+output/*
 
+lmdb_BGC_650M/*
+
+src/__pycache__/*
+src/utils/__pycache__/*

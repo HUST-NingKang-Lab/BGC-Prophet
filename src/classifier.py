@@ -9,7 +9,7 @@ from model import PositionalEncoding
 
 class transformerClassifier(nn.Module):
     def __init__(self, d_model: int=512, nhead: int=8, num_encoder_layers: int=6, max_len: int=128,
-                 dim_feedforward: int=2048, labels_num: int=8, transformer_dropout: float=0.1, mlp_dropout: float=0.5,
+                 dim_feedforward: int=2048, labels_num: int=7, transformer_dropout: float=0.1, mlp_dropout: float=0.5,
                  activation: Union[str, Callable[[Tensor], Tensor]]=F.gelu,
                  layer_norm_eps: float=1e-5, batch_first: bool=True, norm_first: bool=True,
                  device=None, dtype=None) -> None:
@@ -40,9 +40,13 @@ class transformerClassifier(nn.Module):
 
     def forward(self, src: Tensor, src_key_padding_mask: Tensor) -> Any:
         # src: (batch_size, max_len, embed_dim)
-        src = self.encoder(src, mask=None, src_key_padding_mask=src_key_padding_mask)
-        src = torch.mean(src, dim=1)
-        labels = self.classifier(src)
+        memory = self.pos_encoder(src)
+        memory = self.encoder(src, mask=None, src_key_padding_mask=src_key_padding_mask)
+        memory = memory*src_key_padding_mask.unsqueeze(-1)
+        # memory: (batch_size, max_len, embed_dim), src_key_padding_mask: (batch_size, max_len, embed_dim)
+        # memory = memory[:, -1, :].squeeze(1)
+        memory = memory.mean(dim=1).squeeze(1)
+        labels = self.classifier(memory)
         return labels
 
     def __reset_parameters(self):

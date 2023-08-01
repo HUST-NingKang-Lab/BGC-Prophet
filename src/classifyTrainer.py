@@ -11,6 +11,7 @@ import random
 
 from data import DataReader, BGCLabelsDataset
 from loss import trainLoss
+from focal_loss import FocalLoss
 from utils import evaluate
 # from model import transformerEncoderNet
 # from classifyTrainer import TransformerClassifier
@@ -42,7 +43,7 @@ class classifyTrainer():
         self.model.to(self.device)
         
         self.save_path = self.save_dir + \
-        f'transformerClassifier/transformerClassifier_{self.args.max_len}_{self.args.nhead}_{self.args.num_encoder_layers}_{self.args.mlp_dropout}_{self.args.transformer_dropout}_{self.args.learning_rate}_{self.args.epochs}/'
+        f'transformerClassifier/transformerClassifier_{self.args.max_len}_{self.args.nhead}_{self.args.num_encoder_layers}_{self.args.mlp_dropout}_{self.args.transformer_dropout}_{self.args.learning_rate}_{self.args.epochs}_{self.args.alpha}_{self.args.gamma}/'
         os.makedirs(os.path.dirname(self.save_path), exist_ok=True)
 
         print('--------model----------')
@@ -61,6 +62,7 @@ class classifyTrainer():
 
             self.optimizer.zero_grad()
             output = self.model(src=sentence, src_key_padding_mask=distribution)
+            # print(output.shape, labels.shape)
             loss = self.loss(output, labels)
             total_loss += loss.item()
             correct = evaluate(output.clone().detach(), labels)
@@ -152,6 +154,8 @@ if __name__=='__main__':
     parser.add_argument('--epochs', type=int, required=True, help='epochs')
     parser.add_argument('--seed', type=int, required=False, default=42, help='random seed')
     parser.add_argument('--save_dir', type=str, required=False, default='./modelSave/', help='save dir')
+    parser.add_argument('--alpha', type=float, required=False, default=0.25, help='alpha of focal loss')
+    parser.add_argument('--gamma', type=float, required=False, default=2, help='gamma of focal loss')
 
     args = parser.parse_args()
     print('--------args----------')
@@ -170,7 +174,8 @@ if __name__=='__main__':
     total_params = sum(p.numel() for p in model.parameters())
     trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
     print(f'Total params: {total_params}, Trainable params: {trainable_params}')
-    loss = trainLoss()
+    # loss = trainLoss()
+    loss = FocalLoss(alpha=args.alpha, gamma=args.gamma)
     trainer = classifyTrainer(args, writer, data, model, loss)
     trainer.train()
 

@@ -21,10 +21,10 @@ class DataReader:
         # 读取csv并展开为list便于处理
         self.df['labels'] = self.df['labels'].apply(lambda x:x.split())
         self.df['TDsentence'] = self.df['TDsentence'].apply(lambda x:x.split())
-        self.df['TDlabels'] = self.df['TDlabels'].apply(lambda x:x.split()).apply(lambda x:[int(i) for i in x])
+        self.df['TDlabels'] = self.df['TDlabels'].apply(lambda x:x.split()).apply(lambda x:[int(eval(i)) for i in x])
         self.df['labels_rep'] = self.df['labels'].apply(lambda x:x[0]) # 仅取第一个便于分层抽样
 
-        self.labels_list = ['Alkaloid', 'Terpene', 'NRP', 'Polyketide', 'RiPP', 'Saccharide', 'Non', 'Other']
+        self.labels_list = ['Alkaloid', 'Terpene', 'NRP', 'Polyketide', 'RiPP', 'Saccharide', 'Other']
         print(self.labels_list)
         self.labels_num = len(self.labels_list)
 
