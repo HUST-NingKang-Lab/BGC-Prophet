@@ -83,7 +83,19 @@ BGC-Prophet predict --datasetPath ./output/split.csv \
 --outputPath ./output/ --lmdbPath ./lmdb_genomes \
 --name prediction --device cuda --saveIntermediate
 ```
-This command will use GPU to detect BGCs' gene, and the 'TDlabels' column of dataframe loaded from split.csv will be updated, then will output a new csv file named prediction.csv. If 'saveIntermediate' parameter is specified, results of prediction will be saved as a numpy file.
+This command will use GPU to detect BGCs' gene, if 'saveIntermediate' parameter is specified, results of prediction will be saved as a numpy file.
+
+### Output format
+
+Merge genes within a distance of 'max_gap' to form a single BGC, and filter out BGCs composed of fewer than 'min_count' genes, predict and output the BGC with the highest confidence and broadest coverage.
+
+```shell
+BGC-Prophet output --datasetPath ./output/split.csv \
+--outputPath ./output/ --loadIntermediate ./output/intermediate_rediction.npy \
+--name output --threshold 0.03 --max_gap 3 --min_count 2
+```
+
+The 'TDlabels' column of dataframe loaded from split.csv will be updated, then will output a new csv file named prediction.csv.
 
 ### Biosynthetic Classification
 
