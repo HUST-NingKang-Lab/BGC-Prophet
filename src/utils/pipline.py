@@ -42,6 +42,7 @@ class piplineModule:
         self.output.load()
         self.output.save(self.results)
         # classify BGC
+        self.args.datasetPath = self.outputPath + self.name + '.csv'
         self.classifier = geneClassifier(self.args)
         self.classifier.classify()
         self.classifier.process()
@@ -69,11 +70,11 @@ if __name__ == "__main__":
     parser.add_argument('--saveIntermediate', action='store_true', required=False, default=False, help='save intermediate results')
     parser.add_argument('--name', type=str, required=False, default='output', help='name of the output file')
     parser.add_argument('--threads', type=int, required=False, default=10, help='number of threads')
-    parser.add_argument('--threshold', type=float, required=True, default=0.5, help='threshold of the prediction')
+    parser.add_argument('--threshold', type=float, required=True, default=0.03, help='threshold of the prediction')
     parser.add_argument('--max_gap', type=int, required=True, default=3, help='max geme gap for the prediction')
     parser.add_argument('--min_count', type=int, required=True, default=2, help='min gene count for the prediction')
     parser.add_argument('--classifierPath', type=str, required=True, help='classifier path')
-    parser.add_argument('--classify_t', type=float, required=False, default=0.5, help='threshold for classification')
+    parser.add_argument('--classify_t', type=float, required=False, default=0.3, help='threshold for classification')
     # parser.add_argument('--input', '-i', type=str, help='Input fasta file path.')
 
     args = parser.parse_args()

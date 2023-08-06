@@ -56,6 +56,7 @@ class outputFormatter:
         result[result<=self.threshold] = 0.
         TDlabels = result.tolist()
         if not 1. in TDlabels:
+            TDlabels = [0]*len(TDlabels)
             return pd.Series([None, 'No', TDlabels], index=['sentence', 'isBGC', 'TDlabels'])
         current_start = TDlabels.index(1.)
         current_end = current_start
