@@ -48,6 +48,7 @@ class geneClassifier:
         self.data = DataReader(self.datasetPath, test_ratio=0)
         self.dataset = BGCLabelsDataset(self.data, self.lmdbPath, 'eval')
         self.dataLoader = DataLoader(dataset=self.dataset, batch_size=self.batch_size, shuffle=False, num_workers=5)
+        self.OtherIndex = self.data.labels_list.index('Other')
         
     def classify(self):
         self.results = []
@@ -64,19 +65,30 @@ class geneClassifier:
 
     def process(self):
         self.classes = self.results.copy()
-        self.classes[self.classes>=self.classify_t] = 1
-        self.classes[self.classes<self.classify_t] = 0
         dataFrame = pd.read_csv(self.datasetPath)
         labels_list = self.data.labels_list
         for i, row in dataFrame.iterrows():
+            if row['isBGC'] == 'No':
+                dataFrame.loc[i, 'labels'] = 'NonBGC'
+                dataFrame.loc[i, 'probability'] = 1.
+                continue
             result = self.results[i]
-            prediction = self.classes[i]
+            prediction = result.copy()
+            threshold = max(result[self.OtherIndex], self.classify_t)
+            prediction[result>=threshold] = 1
+            prediction[result<threshold] = 0
             if 1 in prediction:
-                dataFrame.loc[i, 'labels'] = ' '.join([labels_list[j] for j in range(len(labels_list)) if prediction[j]==1])
-                dataFrame.loc[i, 'probability'] = np.sum(result*prediction)/np.sum(prediction)
+                labels = [labels_list[j] for j in range(len(labels_list)) if prediction[j]==1]
+                probability = [result[j] for j in range(len(labels_list)) if prediction[j]==1]
+                if 'Other' in labels and len(labels)>1:
+                    oindex = labels.index('Other')
+                    labels.pop(oindex)
+                    probability.pop(oindex)
+                dataFrame.loc[i, 'labels'] = ' '.join(labels)
+                dataFrame.loc[i, 'probability'] = sum(probability)/len(probability)
             else:
                 dataFrame.loc[i, 'labels'] = 'Unknown'
-                dataFrame.loc[i, 'probability'] = np.max(result)
+                dataFrame.loc[i, 'probability'] = 1 - np.max(result)
             
         self.dataFrame = dataFrame
 

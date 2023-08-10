@@ -10,6 +10,6 @@ conda activate pt
 nohup python -u src/classifyEval.py --lmdbPath ./lmdb_train/ \
     --datasetPath ./data/BGC_train_dataset_classify.csv --max_len 128 \
     --batch_size 64 \
-    --modelPath ./modelSave/transformerClassifier/transformerClassifier_128_5_2_0.5_0.1_0.01_200_0.05_1.0/transformerClassifier_199.pt \
-    --name classify_last_7 \
-    >eval_classify_last_7.out &
+    --modelPath ./modelSave/transformerClassifier/transformerClassifier_128_5_2_0.5_0.1_0.01_150_0.1_1.0/transformerClassifier_50.pt \
+    --name classify_last_7——unmask \
+    >eval_classify_last_7_unmask.out &

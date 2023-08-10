@@ -44,6 +44,10 @@ class classifyTrainer():
         
         self.save_path = self.save_dir + \
         f'transformerClassifier/transformerClassifier_{self.args.max_len}_{self.args.nhead}_{self.args.num_encoder_layers}_{self.args.mlp_dropout}_{self.args.transformer_dropout}_{self.args.learning_rate}_{self.args.epochs}_{self.args.alpha}_{self.args.gamma}/'
+        # self.save_path = self.save_dir + \
+        # f'transformerClassifier/transformerClassifier_{self.args.max_len}_{self.args.nhead}_ \
+        #     {self.args.num_encoder_layers}_{self.args.mlp_dropout}_{self.args.transformer_dropout}_ \
+        #     {self.args.learning_rate}_{self.args.epochs}/'
         os.makedirs(os.path.dirname(self.save_path), exist_ok=True)
 
         print('--------model----------')

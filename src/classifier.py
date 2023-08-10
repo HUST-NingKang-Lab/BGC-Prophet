@@ -42,7 +42,7 @@ class transformerClassifier(nn.Module):
         # src: (batch_size, max_len, embed_dim)
         memory = self.pos_encoder(src)
         memory = self.encoder(src, mask=None, src_key_padding_mask=src_key_padding_mask)
-        memory = memory*src_key_padding_mask.unsqueeze(-1)
+        # memory = memory*src_key_padding_mask.unsqueeze(-1)
         # memory: (batch_size, max_len, embed_dim), src_key_padding_mask: (batch_size, max_len, embed_dim)
         # memory = memory[:, -1, :].squeeze(1)
         memory = memory.mean(dim=1).squeeze(1)

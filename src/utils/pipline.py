@@ -53,7 +53,6 @@ class piplineModule:
             os.remove(self.outputPath + self.name + '_split.csv')
             os.remove(self.outputPath + self.name + '.csv')
             os.remove(self.outputPath + self.name + '_results.npy')
-            os.remove(self.outputPath + self.name + '_classified.csv')
         
 
 

@@ -10,7 +10,7 @@ import random
 import sys
 directory = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(directory))
-print(sys.path)
+# print(sys.path)
 from data import DataReader, BGCLabelsDataset
 import lmdb
 
