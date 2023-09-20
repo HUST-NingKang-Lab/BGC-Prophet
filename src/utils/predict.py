@@ -12,8 +12,29 @@ directory = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(directory))
 # print(sys.path)
 from data import DataReader, BGCLabelsDataset
+from baseCommand import baseCommand
+from pathlib import Path
 import lmdb
 
+class predictCommand(baseCommand):
+    name = "predict"
+    description = "Predict the gene cluster of given genomes"
+
+    def add_arguments(self, parser):
+        parser.add_argument('--datasetPath', type=Path, required=True, help='dataset path')
+        parser.add_argument('--modelPath', type=Path, required=True, help='model path')
+        parser.add_argument('--outputPath', type=Path, required=False, default=Path('./output/'), help='output path')
+        parser.add_argument('--lmdbPath', type=Path, required=True, help='gene representations lmdb path')
+        parser.add_argument('--name', type=str, required=False, default='predict', help='name of the output file')
+        parser.add_argument('--device', type=str, required=True, choices=["cuda", "cpu"], help='device to use')
+        parser.add_argument('--batch_size', type=int, required=False, default=512, help='batch size')
+        parser.add_argument('--saveIntermediate', action='store_true', required=False, default=False, help='save intermediate results')
+
+    def handle(self, args):
+        predict = genePredicter(args)
+        predict.predict()
+        if args.saveIntermediate:
+            predict.save()
 
 def create_predict_parser():
     parser = argparse.ArgumentParser(
@@ -74,11 +95,11 @@ class genePredicter:
 
     
 
-if __name__=='__main__':
+# if __name__=='__main__':
 
-    parser = create_predict_parser()
-    args = parser.parse_args()
-    predict = genePredicter(args)
-    predict.predict()
-    if args.saveIntermediate:
-        predict.save()
+#     parser = create_predict_parser()
+#     args = parser.parse_args()
+#     predict = genePredicter(args)
+#     predict.predict()
+#     if args.saveIntermediate:
+#         predict.save()

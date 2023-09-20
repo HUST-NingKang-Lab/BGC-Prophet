@@ -4,6 +4,9 @@ import os
 from multiprocessing import Pool
 from tqdm import tqdm
 from functools import partial
+from baseCommand import baseCommand
+from pathlib import Path
+
 
 def organize_genome(genome, genomesDir):
     genome_name = genome.split('.')[0]
@@ -16,16 +19,20 @@ def organize_genome(genome, genomesDir):
                 gene_seq.append(line.strip()[1:])
     return pd.Series([genome_name, gene_seq], index=['Genome', 'Gene_sequence'])
 
-def create_organize_parser():
-    parser = argparse.ArgumentParser(
-        prog="organize",
-        description="Organize the input genomes of BGC-Prophet",
-    )
-    parser.add_argument('--genomesDir', type=str, required=True, help='genomes fasta directory')
-    parser.add_argument('--outputPath', type=str, required=False, default='./output/', help='output path')
-    parser.add_argument('--name', type=str, required=False, default='output', help='name of the output file')
-    parser.add_argument('--threads', type=int, required=False, default=10, help='number of threads')
-    return parser
+class organizeCommand(baseCommand):
+    name = 'organize'
+    description = 'Organize the input genomes of BGC-Prophet'
+
+    def add_arguments(self, parser):
+        parser.add_argument('--genomesDir', type=Path, required=True, help='genomes fasta directory')
+        parser.add_argument('--outputPath', type=Path, required=False, default=Path('./output/'), help='output path')
+        parser.add_argument('--name', type=str, required=False, default='output', help='name of the output file')
+        parser.add_argument('--threads', type=int, required=False, default=10, help='number of cpu threads to use in organizing')
+
+    def handle(self, args):
+        organize = organizeModule(args)
+        organize.organize_genomes()
+        organize.save()
 
 class organizeModule:
     def __init__(self, args) -> None:
@@ -46,13 +53,13 @@ class organizeModule:
 
     def save(self, ):
         print("Saving to csv...")
-        os.makedirs(os.path.dirname(self.outputPath), exist_ok=True)
-        self.dataFrame.to_csv(self.outputPath + self.name + '.csv', index=False)
+        os.makedirs(self.outputPath, exist_ok=True)
+        self.dataFrame.to_csv(self.outputPath.joinpath(self.name+'.csv'), index=False)
 
 
-if __name__=='__main__':
-    parser = create_organize_parser()
-    args = parser.parse_args()
-    organize = organizeModule(args)
-    organize.organize_genomes()
-    organize.save()
+# if __name__=='__main__':
+#     parser = create_organize_parser()
+#     args = parser.parse_args()
+#     organize = organizeModule(args)
+#     organize.organize_genomes()
+#     organize.save()

@@ -1,6 +1,28 @@
 import numpy as np
 import pandas as pd
 import argparse
+from pathlib import Path
+
+from baseCommand import baseCommand
+
+class outputCommand(baseCommand):
+    name = "output"
+    description = "Output the results of the prediction"
+
+    def add_arguments(self, parser):
+        parser.add_argument('--datasetPath', type=Path, required=True, help='dataset path')
+        parser.add_argument('--outputPath', type=Path, required=False, default=Path('./output/'), help='output path')
+        parser.add_argument('--loadIntermediate', type=str, required=True, default=None, help='load intermediate results')
+        parser.add_argument('--name', type=str, required=False, default='output', help='name of the output file')
+        parser.add_argument('--threshold', type=float, required=True, default=0.5, help='threshold for the prediction')
+        parser.add_argument('--max_gap', type=int, required=True, default=3, help='max gene gap for the prediction')
+        parser.add_argument('--min_count', type=int, required=True, default=2, help='min gene count for the prediction')
+    
+    def handle(self, args):
+        output = outputFormatter(args)
+        output.load()
+        output.save(output.results)
+
 
 class outputFormatter:
     def __init__(self, args) -> None:
@@ -31,21 +53,6 @@ class outputFormatter:
         self.dataFrame['sentence'] = self.dataFrame['sentence'].apply(lambda x: ' '.join(x) if x!=None else None)
         self.dataFrame['TDlabels'] = self.dataFrame['TDlabels'].apply(lambda x: ' '.join([str(i) for i in x]))
         # print(self.dataFrame.head())
-
-        # for index, row in self.dataset.iterrows():
-        #     ID = row['ID']
-        #     TDsentence = row['TDsentence']
-        #     result = results[index]
-        #     labels = row['labels']
-        #     isBGC = row['isBGC']
-        #     TDlabels, start, end, range = self.output(TDsentence, result)
-        #     if range<self.min_count:
-        #         isBGC = 'No'
-        #         sentence = None
-        #     else:
-        #         sentence = TDsentence[start:end+1]
-        #         isBGC = 'Yes'
-        #     self.dataFrame.loc[len(self.dataFrame)] = [ID, sentence, labels, isBGC, TDsentence, TDlabels]
 
     def output(self, series):
         TDlabels = []
@@ -90,24 +97,24 @@ class outputFormatter:
 
     def save(self, results):
         self.organize(results)
-        self.dataFrame.to_csv(self.outputPath+f'{self.name}.csv', index=False, header=True)
+        self.dataFrame.to_csv(self.outputPath.joinpath(f'{self.name}.csv'), index=False, header=True)
 
-if __name__=='__main__':
-    parser = argparse.ArgumentParser(
-        prog='output',
-        description='Output the results of the prediction',
-    )
-    parser.add_argument('--datasetPath', type=str, required=True, help='dataset path')
-    parser.add_argument('--outputPath', type=str, required=False, default='./output/', help='output path')
-    parser.add_argument('--loadIntermediate', type=str, required=True, default=None, help='load intermediate results')
-    parser.add_argument('--name', type=str, required=False, default='output', help='name of the output file')
-    parser.add_argument('--threshold', type=float, required=True, default=0.5, help='threshold for the prediction')
-    parser.add_argument('--max_gap', type=int, required=True, default=3, help='max gene gap for the prediction')
-    parser.add_argument('--min_count', type=int, required=True, default=2, help='min gene count for the prediction')
+# if __name__=='__main__':
+#     parser = argparse.ArgumentParser(
+#         prog='output',
+#         description='Output the results of the prediction',
+#     )
+#     parser.add_argument('--datasetPath', type=str, required=True, help='dataset path')
+#     parser.add_argument('--outputPath', type=str, required=False, default='./output/', help='output path')
+#     parser.add_argument('--loadIntermediate', type=str, required=True, default=None, help='load intermediate results')
+#     parser.add_argument('--name', type=str, required=False, default='output', help='name of the output file')
+#     parser.add_argument('--threshold', type=float, required=True, default=0.5, help='threshold for the prediction')
+#     parser.add_argument('--max_gap', type=int, required=True, default=3, help='max gene gap for the prediction')
+#     parser.add_argument('--min_count', type=int, required=True, default=2, help='min gene count for the prediction')
 
-    args = parser.parse_args()
+#     args = parser.parse_args()
 
-    output = outputFormatter(args)
-    # output = outputFormatter(args.datasetPath, args.outputPath, args.loadIntermediate, args.name, args.threshold, args.max_gap, args.min_count)
-    output.load()
-    output.save(output.results)
+#     output = outputFormatter(args)
+#     # output = outputFormatter(args.datasetPath, args.outputPath, args.loadIntermediate, args.name, args.threshold, args.max_gap, args.min_count)
+#     output.load()
+#     output.save(output.results)

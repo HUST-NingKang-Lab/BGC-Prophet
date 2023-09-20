@@ -8,67 +8,72 @@ import argparse
 import pathlib
 import lmdb
 import pickle
-# import gc
 import torch
 
 from esm import Alphabet, FastaBatchedDataset, ProteinBertModel, pretrained, MSATransformer
+from baseCommand import baseCommand
 
-# torch.set_num_threads(128)
-# gc.collect()
-# torch.cuda.empty_cache()
+class ExtractCommand(baseCommand):
+    name = "extract"
+    description = "Extract all tokens' mean representations and save to a lmdb file for sequences in a FASTA file"
 
-
-def create_parser():
-    parser = argparse.ArgumentParser(
-        description="Extract per-token representations and model outputs for sequences in a FASTA file"  # noqa
-    )
-
-    parser.add_argument(
+    def add_arguments(self, parser):
+        parser.add_argument(
         "model_location",
         type=str,
         help="PyTorch model file OR name of pretrained model to download (see README for models)",
-    )
-    parser.add_argument(
-        "fasta_file",
-        type=pathlib.Path,
-        help="FASTA file on which to extract representations",
-    )
-    parser.add_argument(
-        "lmdb_path",
-        type=pathlib.Path,
-        help="path to save the lmdb file",
-    )
-    # parser.add_argument(
-    #     "output_dir",
-    #     type=pathlib.Path,
-    #     help="output directory for extracted representations",
-    # )
+        )
+        parser.add_argument(
+            "fasta_file",
+            type=pathlib.Path,
+            help="FASTA file on which to extract representations",
+        )
+        parser.add_argument(
+            "lmdb_path",
+            type=pathlib.Path,
+            default=pathlib.Path("./output/lmdb/"),
+            help="path to save the lmdb file",
+        )
+        # parser.add_argument(
+        #     "output_dir",
+        #     type=pathlib.Path,
+        #     help="output directory for extracted representations",
+        # )
 
-    parser.add_argument("--toks_per_batch", type=int, default=4096, help="maximum batch size")
-    parser.add_argument(
-        "--repr_layers",
-        type=int,
-        default=[-1],
-        nargs="+",
-        help="layers indices from which to extract representations (0 to num_layers, inclusive)",
-    )
-    parser.add_argument(
-        "--include",
-        type=str,
-        nargs="+",
-        choices=["mean", "per_tok", "bos", "contacts"],
-        help="specify which representations to return",
-        required=True,
-    )
-    parser.add_argument(
-        "--truncation_seq_length",
-        type=int,
-        default=1022,
-        help="truncate sequences longer than the given value",
-    )
+        parser.add_argument("--toks_per_batch", type=int, default=4096, help="maximum batch size")
+        parser.add_argument(
+            "--repr_layers",
+            type=int,
+            default=[-1],
+            nargs="+",
+            help="layers indices from which to extract representations (0 to num_layers, inclusive)",
+        )
+        parser.add_argument(
+            "--include",
+            type=str,
+            nargs="+",
+            choices=["mean", "per_tok", "bos", "contacts"],
+            help="specify which representations to return",
+            required=True,
+        )
+        parser.add_argument(
+            "--truncation_seq_length",
+            type=int,
+            default=1022,
+            help="truncate sequences longer than the given value",
+        )
+        parser.add_argument(
+            "--write_batches",
+            type=int,
+            default=1000,
+            help="write to lmdb every this many batches, RAM usage increases with this number",
+        )
 
-    parser.add_argument("--nogpu", action="store_true", help="Do not use GPU even if available")
-    return parser
+        parser.add_argument("--nogpu", action="store_true", help="Do not use GPU even if available")
+
+    def handle(self, args):
+        run(args)
+
 
 
 def run(args):
@@ -91,9 +96,8 @@ def run(args):
 
     args.lmdb_path.mkdir(parents=True, exist_ok=True)
     # args.output_dir.mkdir(parents=True, exist_ok=True)
-    lmdb_path = str(args.lmdb_path)
     map_size = 307374182400
-    env = lmdb.open(lmdb_path, subdir=True, map_size=map_size, readonly=False, meminit=False, map_async=True)
+    env = lmdb.open(str(args.lmdb_path), subdir=True, map_size=map_size, readonly=False, meminit=False, map_async=True)
     return_contacts = "contacts" in args.include
 
     assert all(-(model.num_layers + 1) <= i <= model.num_layers for i in args.repr_layers)
@@ -142,7 +146,8 @@ def run(args):
                     result["contacts"] = contacts[i, : truncate_len, : truncate_len].clone()
 
                 results.append(result)
-            if batch_idx!=0 and batch_idx%1000 == 0:
+
+            if batch_idx!=0 and batch_idx%args.write_batches == 0:
                 with env.begin(write=True) as txn:
                     for result_w in results:
                         label_w = result_w["label"]
@@ -155,11 +160,11 @@ def run(args):
                     txn.put(label_w.encode('ascii'), pickle.dumps(result_w))
 
 
-def main():
-    parser = create_parser()
-    args = parser.parse_args()
-    run(args)
+# def main():
+#     parser = create_parser()
+#     args = parser.parse_args()
+#     run(args)
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()
 
