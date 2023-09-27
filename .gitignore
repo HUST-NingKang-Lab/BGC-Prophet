@@ -20,5 +20,12 @@ output/*
 
 lmdb_BGC_650M/*
 
-src/__pycache__/*
-src/utils/__pycache__/*
+bgc_prophet/__pycache__/*
+bgc_prophet/command/__pycache__/*
+bgc_prophet/train/__pycache__/*
+
+bgc_prophet.egg-info/*
+dist/*
+build/*
+src/*
+src/utils/*
