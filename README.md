@@ -4,9 +4,6 @@ BGC-Prophet, a deep learning approach that leverages language processing neural 
 
 ![figure1](images/figure1.png?raw=true "figure1")
 
-## Publications
-
-...
 
 ## Installation
 
@@ -18,7 +15,7 @@ pip install bgc_prophet
 
 BGC-Prophet is developed under the environment of Python3, and uses Pytroch to build the model, GPU devices are recommended to accelerate model infernece.
 
-## Using
+## Usage
 
 ### BGC-Prophet Pipline
 
@@ -114,5 +111,17 @@ bgc_prophet classify --datasetPath ./prediction.csv \
 
 The finall output will be save as a csv file, containing dection and classification results.
 
+## Publications
+
+...
+
+## Maintainer
+
+| Name       | Email                                                     | Organization                                                 |
+| ---------- | --------------------------------------------------------- | ------------------------------------------------------------ |
+| Qilong Lai | [laiqilong@hust.edu.cn](mailto:laiqilong@hust.edu.cn)     | PhD student, Institute of Neuroscience, Chinese Academy of Sciences |
+| Shuai Yao  | [yaoshuai@stu.pku.edu.cn](mailto:yaoshuai@stu.pku.edu.cn) | PhD student, Academy for Advanced interdisciplinary Studies, Peking University |
+| Yuguo Zha  | [hugozha@hust.edu.cn](mailto:hugozha@hust.edu.cn)         | PhD student, School of Life Science and Technology, Huazhong University of Science & Technology |
+| Kang Ning  | [ningkang@hust.edu.cn](mailto:ningkang@hust.edu.cn)       | Professor, School of Life Science and Technology, Huazhong University of Science & Technology |
 
 
