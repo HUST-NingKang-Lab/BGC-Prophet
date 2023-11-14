@@ -115,4 +115,13 @@ The finall output will be save as a csv file, containing dection and classificat
 
 ...
 
+## Maintainer
+
+| Name       | Email                                                     | Organization                                                 |
+| ---------- | --------------------------------------------------------- | ------------------------------------------------------------ |
+| Qilong Lai | [laiqilong@hust.edu.cn](mailto:laiqilong@hust.edu.cn)     | PhD student, Institute of Neuroscience, Chinese Academy of Sciences |
+| Shuai Yao  | [yaoshuai@stu.pku.edu.cn](mailto:yaoshuai@stu.pku.edu.cn) | PhD student, Academy for Advanced interdisciplinary Studies, Peking University |
+| Yuguo Zha  | [hugozha@hust.edu.cn](mailto:hugozha@hust.edu.cn)         | PhD student, School of Life Science and Technology, Huazhong University of Science & Technology |
+| Kang Ning  | [ningkang@hust.edu.cn](mailto:ningkang@hust.edu.cn)       | Professor, School of Life Science and Technology, Huazhong University of Science & Technology |
+
 
