@@ -71,7 +71,7 @@ class genePredicter:
 
         self.model = transformerEncoderNet(d_model=320, nhead=5, num_encoder_layers=2, max_len=128,
                                            dim_feedforward=320*4, transformer_dropout=0.1, mlp_dropout=0.5, batch_first=True)
-        state_dict = torch.load(self.modelPath)
+        state_dict = torch.load(self.modelPath, map_location=torch.device('cpu'))
         self.model.load_state_dict(state_dict)
         self.model.to(self.device)
         self.model.eval()

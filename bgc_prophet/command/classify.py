@@ -66,7 +66,7 @@ class geneClassifier:
         self.model = transformerClassifier(d_model=320, nhead=5, num_encoder_layers=2, max_len=128, 
                                            dim_feedforward=320*4, labels_num=7, transformer_dropout=0.1, 
                                            mlp_dropout=0.5)
-        state_dict = torch.load(self.classifierPath)
+        state_dict = torch.load(self.classifierPath, map_location=torch.device('cpu'))
         self.model.load_state_dict(state_dict)
         self.model.to(self.device)
         self.model.eval()
