@@ -49,9 +49,14 @@ def main():
         cmd_instance.add_arguments(subparser)
     
     args = parser.parse_args()
-    if args.device == 'cuda' and not torch.cuda.is_available():
+    if not hasattr(args, 'device'):
+        args.device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    elif args.device == 'cuda' and not torch.cuda.is_available():
         print('CUDA is not available, use CPU instead')
         args.device = 'cpu'
+    if hasattr(args, 'nogpu') and args.nogpu:
+        args.device = 'cpu'
+        
     if hasattr(args, 'handle'):
         args.handle(args)
     else:

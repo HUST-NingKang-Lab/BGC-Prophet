@@ -24,9 +24,9 @@ class ExtractCommand(baseCommand):
         help="PyTorch model file OR name of pretrained model to download (see README for models)",
         )
         parser.add_argument(
-            "fasta_file",
+            "fasta",
             type=pathlib.Path,
-            help="FASTA file on which to extract representations",
+            help="FASTA source on which to extract representations",
         )
         parser.add_argument(
             "lmdb_path",
@@ -41,6 +41,7 @@ class ExtractCommand(baseCommand):
         # )
 
         parser.add_argument("--toks_per_batch", type=int, default=4096, help="maximum batch size")
+        parser.add_argument("--directory", '-d', action='store_true', required=False, default=False, help='indicate the input is a directory')
         parser.add_argument(
             "--repr_layers",
             type=int,
@@ -87,78 +88,93 @@ def run(args):
         model = model.cuda()
         print("Transferred model to GPU")
 
-    dataset = FastaBatchedDataset.from_file(args.fasta_file)
-    batches = dataset.get_batch_indices(args.toks_per_batch, extra_toks_per_seq=1)
-    data_loader = torch.utils.data.DataLoader(
-        dataset, collate_fn=alphabet.get_batch_converter(args.truncation_seq_length), batch_sampler=batches, num_workers=8
-    )
-    print(f"Read {args.fasta_file} with {len(dataset)} sequences")
+    def extract_and_save(fasta_file, model, alphabet, args):
+        dataset = FastaBatchedDataset.from_file(fasta_file)
+        batches = dataset.get_batch_indices(args.toks_per_batch, extra_toks_per_seq=1)
+        data_loader = torch.utils.data.DataLoader(
+            dataset, collate_fn=alphabet.get_batch_converter(args.truncation_seq_length), batch_sampler=batches, num_workers=8
+        )
+        print(f"Read {fasta_file} with {len(dataset)} sequences")
 
-    args.lmdb_path.mkdir(parents=True, exist_ok=True)
-    # args.output_dir.mkdir(parents=True, exist_ok=True)
-    map_size = 307374182400
-    env = lmdb.open(str(args.lmdb_path), subdir=True, map_size=map_size, readonly=False, meminit=False, map_async=True)
-    return_contacts = "contacts" in args.include
+        args.lmdb_path.mkdir(parents=True, exist_ok=True)
+        # args.output_dir.mkdir(parents=True, exist_ok=True)
+        map_size = 307374182400
+        env = lmdb.open(str(args.lmdb_path), subdir=True, map_size=map_size, readonly=False, meminit=False, map_async=True)
+        return_contacts = "contacts" in args.include
 
-    assert all(-(model.num_layers + 1) <= i <= model.num_layers for i in args.repr_layers)
-    repr_layers = [(i + model.num_layers + 1) % (model.num_layers + 1) for i in args.repr_layers]
+        assert all(-(model.num_layers + 1) <= i <= model.num_layers for i in args.repr_layers)
+        repr_layers = [(i + model.num_layers + 1) % (model.num_layers + 1) for i in args.repr_layers]
 
-    results = []
-    with torch.no_grad():
-        for batch_idx, (labels, strs, toks) in enumerate(data_loader):
-            print(
-                f"Processing {batch_idx + 1} of {len(batches)} batches ({toks.size(0)} sequences)"
-            )
-            if torch.cuda.is_available() and not args.nogpu:
-                toks = toks.to(device="cuda", non_blocking=True)
+        results = []
+        with torch.no_grad():
+            for batch_idx, (labels, strs, toks) in enumerate(data_loader):
+                print(
+                    f"Processing {batch_idx + 1} of {len(batches)} batches ({toks.size(0)} sequences)"
+                )
+                if torch.cuda.is_available() and not args.nogpu:
+                    toks = toks.to(device="cuda", non_blocking=True)
 
-            out = model(toks, repr_layers=repr_layers, return_contacts=return_contacts)
+                out = model(toks, repr_layers=repr_layers, return_contacts=return_contacts)
 
-            logits = out["logits"].to(device="cpu")
-            representations = {
-                layer: t.to(device="cpu") for layer, t in out["representations"].items()
-            }
-            if return_contacts:
-                contacts = out["contacts"].to(device="cpu")
-
-            for i, label in enumerate(labels):
-                # args.output_file = args.output_dir / f"{label}.pt"
-                # args.output_file.parent.mkdir(parents=True, exist_ok=True)
-                result = {"label": label}
-                truncate_len = min(args.truncation_seq_length, len(strs[i]))
-                # Call clone on tensors to ensure tensors are not views into a larger representation
-                # See https://github.com/pytorch/pytorch/issues/1995
-                if "per_tok" in args.include:
-                    result["representations"] = {
-                        layer: t[i, 1 : truncate_len + 1].clone()
-                        for layer, t in representations.items()
-                    }
-                if "mean" in args.include:
-                    result["mean_representations"] = {
-                        layer: t[i, 1 : truncate_len + 1].mean(0).clone()
-                        for layer, t in representations.items()
-                    }
-                if "bos" in args.include:
-                    result["bos_representations"] = {
-                        layer: t[i, 0].clone() for layer, t in representations.items()
-                    }
+                logits = out["logits"].to(device="cpu")
+                representations = {
+                    layer: t.to(device="cpu") for layer, t in out["representations"].items()
+                }
                 if return_contacts:
-                    result["contacts"] = contacts[i, : truncate_len, : truncate_len].clone()
+                    contacts = out["contacts"].to(device="cpu")
 
-                results.append(result)
+                for i, label in enumerate(labels):
+                    # args.output_file = args.output_dir / f"{label}.pt"
+                    # args.output_file.parent.mkdir(parents=True, exist_ok=True)
+                    result = {"label": label}
+                    truncate_len = min(args.truncation_seq_length, len(strs[i]))
+                    # Call clone on tensors to ensure tensors are not views into a larger representation
+                    # See https://github.com/pytorch/pytorch/issues/1995
+                    if "per_tok" in args.include:
+                        result["representations"] = {
+                            layer: t[i, 1 : truncate_len + 1].clone()
+                            for layer, t in representations.items()
+                        }
+                    if "mean" in args.include:
+                        result["mean_representations"] = {
+                            layer: t[i, 1 : truncate_len + 1].mean(0).clone()
+                            for layer, t in representations.items()
+                        }
+                    if "bos" in args.include:
+                        result["bos_representations"] = {
+                            layer: t[i, 0].clone() for layer, t in representations.items()
+                        }
+                    if return_contacts:
+                        result["contacts"] = contacts[i, : truncate_len, : truncate_len].clone()
 
-            if batch_idx!=0 and batch_idx%args.write_batches == 0:
+                    results.append(result)
+
+                if batch_idx!=0 and batch_idx%args.write_batches == 0:
+                    with env.begin(write=True) as txn:
+                        for result_w in results:
+                            label_w = result_w["label"]
+                            txn.put(label_w.encode('ascii'), pickle.dumps(result_w))
+                    results = []
+            if results:
                 with env.begin(write=True) as txn:
                     for result_w in results:
                         label_w = result_w["label"]
                         txn.put(label_w.encode('ascii'), pickle.dumps(result_w))
-                results = []
-        if results:
-            with env.begin(write=True) as txn:
-                for result_w in results:
-                    label_w = result_w["label"]
-                    txn.put(label_w.encode('ascii'), pickle.dumps(result_w))
 
+
+    if args.directory:
+        if not args.fasta.is_dir():
+            raise ValueError("The input is not a directory.")
+        else:
+            fasta_files = [f for f in args.fasta.iterdir() if f.is_file() and f.suffix in ['.fasta', '.faa']]
+            for fasta_file in fasta_files:
+                extract_and_save(fasta_file=fasta_file, model=model, alphabet=alphabet, args=args)
+    else:
+        if args.fasta.is_dir():
+            raise ValueError("The input is a directory but not indicated with -d.")
+        else:
+            fasta_file = args.fasta
+            extract_and_save(fasta_file=fasta_file, model=model, alphabet=alphabet, args=args)
 
 # def main():
 #     parser = create_parser()

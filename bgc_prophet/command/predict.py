@@ -77,7 +77,7 @@ class genePredicter:
         self.model.eval()
 
         self.data = DataReader(self.datasetPath, test_ratio=0)
-        self.dataset = BGCLabelsDataset(self.data, self.lmdbPath, 'eval')
+        self.dataset = BGCLabelsDataset(self.data, str(self.lmdbPath), 'eval')
         self.dataLoader = DataLoader(dataset=self.dataset, batch_size=self.batch_size, shuffle=False, num_workers=5)
 
     def predict(self):

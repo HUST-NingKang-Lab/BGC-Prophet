@@ -19,7 +19,7 @@ BGC-Prophet is developed under the environment of Python3, and uses Pytroch to b
 
 ### BGC-Prophet Pipline
 
-BGC-Prophet can detect and classify BGCs in server genomic sequence. The process involves several steps:
+BGC-Prophet can detect and classify BGCs in several genomic sequences. The process involves some steps:
 
 1. Utilizing the ESM2 model to extract word embeddings for each gene in the sequences.
 
@@ -31,11 +31,11 @@ BGC-Prophet can detect and classify BGCs in server genomic sequence. The process
 
 
 ```shell
-bgc_prophet pipeline --genomesDir ./pathtogenomesdir/ --modelPath ./pathto/annotator.pt --saveIntermediate --name nameoftask --threshold 0.03 --max_gap 3 --min_count 2 --classifierPath ./pathto/classifier.pt  --classify_t 0.5
+bgc_prophet pipeline --genomesDir ./pathtogenomesdirectory/ --modelPath ./pathto/annotator.pt --saveIntermediate --name nameoftask --threshold 0.03 --max_gap 3 --min_count 2 --classifierPath ./pathto/classifier.pt  --classify_t 0.5
  
 ```
 
-use `bgc_prophet pipline --help` command for more help
+use `bgc_prophet pipline --help` command for more explanation of parameters.
 
 
 ### Download models
@@ -56,10 +56,14 @@ wget https://github.com/HUST-NingKang-Lab/BGC-Prophet/files/12733164/model.tar.g
 We use ESM2-8M model to get genes' embedding vector, and the last layer output of the model is selected as the final word embedding vector for the sequences. You can use the following command:
 
 ```shell
-bgc_prophet extract esm2_t6_8M_UR50D ./genomes.fasta ./lmdb_genomes --toks_per_batch 40960 --include mean
+bgc_prophet extract esm2_t6_8M_UR50D ./genome.fasta ./lmdb_genomes --toks_per_batch 40960 --include mean
 ```
 
-This operation will get a lmdb dataset folder, containing all sequences embeddings.
+This operation takes a gene context to be explored as input, with each gene represented by an amino acid sequence, and outputs a folder in the LMBD format, storing the corresponding gene's word embedding vectors. 
+
+If you need to obtain multiple FASTA files, you can specify the "--directory" or "-d" parameter, and the FASTA location parameter should be specified as a folder.
+
+Special amino acid symbols like "J" should be replaced with "L" or "I" manually. This operation has a minor impact on the overall generation of word vectors.
 
 #### Organize Genomes
 
@@ -73,7 +77,7 @@ This operation will generate a csv file(organize.csv) organizing all genomes and
 
 Split the genome into gene sequences of length 128.
 ```shell
-bgc_prophet split --genomesPath ./output/organize.csv --outputPath ./output/ --name split -threads 10
+bgc_prophet split --genomesPath ./output/organize.csv --outputPath ./output/ --name split --threads 10
 ```
 This operatione will get a csv file(split.csv), all genomes will be split into gene id sequences of length 128.
 

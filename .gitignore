@@ -2,7 +2,7 @@ data/geno2geneseq.csv
 data/BGC_labels_dataset.csv
 resultSave/*
 modelSave/*
-log
+log/*
 src/__pycache__/*
 lmdb_val
 lmdb_BGC
@@ -29,3 +29,5 @@ dist/*
 build/*
 src/*
 src/utils/*
+*.sh
+data/*
