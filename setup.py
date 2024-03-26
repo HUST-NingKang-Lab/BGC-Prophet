@@ -22,7 +22,7 @@ VERSION = '0.1.0'
 
 # What packages are required for this module to be executed?
 REQUIRED = [
-    'torch', 'lmdb', 'pandas', 'numpy', 'tqdm', 'scikit-learn', 'matplotlib', 'fair-esm'
+    'torch', 'lmdb', 'pandas', 'numpy', 'tqdm', 'scikit-learn', 'matplotlib', 'fair-esm', 'biopython'
     # 'requests', 'maya', 'records',
 ]
 

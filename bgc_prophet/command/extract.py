@@ -9,6 +9,10 @@ import pathlib
 import lmdb
 import pickle
 import torch
+from Bio import SeqIO
+from Bio.Seq import Seq
+from Bio.SeqRecord import SeqRecord
+import os
 
 from esm import Alphabet, FastaBatchedDataset, ProteinBertModel, pretrained, MSATransformer
 from .baseCommand import baseCommand
@@ -89,14 +93,19 @@ def run(args):
         print("Transferred model to GPU")
 
     def extract_and_save(fasta_file, model, alphabet, args):
-        dataset = FastaBatchedDataset.from_file(fasta_file)
+        args.lmdb_path.mkdir(parents=True, exist_ok=True)
+        fasta_seqs = list(SeqIO.parse(fasta_file, "fasta"))
+        fasta_id_seqs = [SeqRecord(Seq(str(seq.seq)), id=seq.id, description="") for seq in fasta_seqs]
+        temp_file = args.lmdb_path / ('temp_'+str(fasta_file.name))
+        SeqIO.write(fasta_id_seqs, temp_file, "fasta")
+        dataset = FastaBatchedDataset.from_file(temp_file)
+        os.remove(temp_file)
         batches = dataset.get_batch_indices(args.toks_per_batch, extra_toks_per_seq=1)
         data_loader = torch.utils.data.DataLoader(
             dataset, collate_fn=alphabet.get_batch_converter(args.truncation_seq_length), batch_sampler=batches, num_workers=8
         )
         print(f"Read {fasta_file} with {len(dataset)} sequences")
 
-        args.lmdb_path.mkdir(parents=True, exist_ok=True)
         # args.output_dir.mkdir(parents=True, exist_ok=True)
         map_size = 307374182400
         env = lmdb.open(str(args.lmdb_path), subdir=True, map_size=map_size, readonly=False, meminit=False, map_async=True)

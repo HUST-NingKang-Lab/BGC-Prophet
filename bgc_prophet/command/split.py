@@ -12,7 +12,7 @@ class splitCommand(baseCommand):
     description = "Split genomes into sequences which have 128 genes"
 
     def add_arguments(self, parser):
-        parser.add_argument('--genomesPath', type=Path, required=True, help='genomes path')
+        parser.add_argument('--genomesPath', type=Path, required=True, help='genomes csv path')
         parser.add_argument('--outputPath', type=Path, required=False, default=Path('./output/'), help='output path')
         parser.add_argument('--name', type=str, required=False, default='split', help='name of the output file')
         parser.add_argument('--threads', type=int, required=False, default=10, help='number of cpu threads to split genomes')

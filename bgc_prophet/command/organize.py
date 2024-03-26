@@ -6,18 +6,21 @@ from tqdm import tqdm
 from functools import partial
 from .baseCommand import baseCommand
 from pathlib import Path
+from Bio import SeqIO
 
 
 def organize_genome(genome, genomesDir):
-    genome_name = genome.split('.')[0]
-    gene_seq = []
-    with open(genomesDir.joinpath(genome), 'r') as f:
-        for line in f:
-            if not line.startswith('>'):
-                continue
-            else:
-                gene_seq.append(line.strip()[1:])
-    return pd.Series([genome_name, gene_seq], index=['Genome', 'Gene_sequence'])
+    genome_name = os.path.splitext(genome)[0]
+    # gene_seq = []
+    genome_seq = list(SeqIO.parse(genomesDir.joinpath(genome), 'fasta'))
+    gene_names = [seq.id for seq in genome_seq]
+    # with open(genomesDir.joinpath(genome), 'r') as f:
+    #     for line in f:
+    #         if not line.startswith('>'):
+    #             continue
+    #         else:
+    #             gene_seq.append(line.strip()[1:])
+    return pd.Series([genome_name, gene_names], index=['Genome', 'Gene_sequence'])
 
 class organizeCommand(baseCommand):
     name = 'organize'

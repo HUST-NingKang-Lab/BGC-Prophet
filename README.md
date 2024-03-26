@@ -31,7 +31,7 @@ BGC-Prophet can detect and classify BGCs in several genomic sequences. The proce
 
 
 ```shell
-bgc_prophet pipeline --genomesDir ./pathtogenomesdirectory/ --modelPath ./pathto/annotator.pt --saveIntermediate --name nameoftask --threshold 0.03 --max_gap 3 --min_count 2 --classifierPath ./pathto/classifier.pt  --classify_t 0.5
+bgc_prophet pipeline --genomesDir ./pathtogenomesdirectory/ --modelPath ./pathto/annotator.pt --saveIntermediate --name nameoftask --threshold 0.5 --max_gap 3 --min_count 2 --classifierPath ./pathto/classifier.pt  --classify_t 0.5
  
 ```
 
@@ -63,7 +63,7 @@ This operation takes a gene context to be explored as input, with each gene repr
 
 If you need to obtain multiple FASTA files, you can specify the "--directory" or "-d" parameter, and the FASTA location parameter should be specified as a folder.
 
-Special amino acid symbols like "J" should be replaced with "L" or "I" manually. This operation has a minor impact on the overall generation of word vectors.
+Special amino acid symbols like "J" should be replaced with "L" or "I" manually. This operation has a minor impact on the overall generation of gene embeddings.
 
 #### Organize Genomes
 
@@ -97,17 +97,17 @@ Merge genes within a distance of 'max_gap' to form a single BGC, and filter out 
 ```shell
 bgc_prophet output --datasetPath ./output/split.csv \
 --outputPath ./output/ --loadIntermediate ./output/intermediate_prediction.npy \
---name output --threshold 0.03 --max_gap 3 --min_count 2
+--name output --threshold 0.5 --max_gap 3 --min_count 2
 ```
 
-The 'TDlabels' column of dataframe loaded from split.csv will be updated, then will output a new csv file named prediction.csv.
+The 'TDlabels' column of dataframe loaded from split.csv will be updated, then will output a new csv file named output.csv.
 
 #### Biosynthetic Classify
 
 Apply a trained classifier to categorize the detected BGCs.
 
 ```shell
-bgc_prophet classify --datasetPath ./prediction.csv \
+bgc_prophet classify --datasetPath ./output.csv \
 --classifierPath ./pathto/classifier.pt \
 --outputPath ./output/ --lmdbPath ./lmdb_genomes \
 --name classify --device cuda 
