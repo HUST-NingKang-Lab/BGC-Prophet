@@ -123,13 +123,13 @@ The finall output will be save as a csv file, containing dection and classificat
 
 ## Publications
 
-Deciphering the Biosynthetic Potential of Microbial Genomes Using a BGC Language Processing Neural Network Model [[bioRxiv]](https://doi.org/10.1101/2023.11.30.569352)
+Deciphering the Biosynthetic Potential of Microbial Genomes Using a BGC Language Processing Neural Network Model [[bioRxiv]](https://doi.org/10.1101/2023.11.30.569352) [[Nucleic Acids Research]](https://doi.org/10.1093/nar/gkaf305)
 
 ## Maintainer
 
 | Name       | Email                                                     | Organization                                                 |
 | ---------- | --------------------------------------------------------- | ------------------------------------------------------------ |
-| Qilong Lai | [laiqilong@hust.edu.cn](mailto:laiqilong@hust.edu.cn)     | PhD student, Institute of Neuroscience, Chinese Academy of Sciences |
+| Qilong Lai | [laiql@connect.hku.hk](mailto:laiql@connect.hku.hk)     | PhD student, Department of Computer Science, The University of Hong Kong |
 | Shuai Yao  | [yaoshuai@stu.pku.edu.cn](mailto:yaoshuai@stu.pku.edu.cn) | PhD student, Academy for Advanced interdisciplinary Studies, Peking University |
 | Yuguo Zha  | [hugozha@hust.edu.cn](mailto:hugozha@hust.edu.cn)         | PhD student, School of Life Science and Technology, Huazhong University of Science & Technology |
 | Kang Ning  | [ningkang@hust.edu.cn](mailto:ningkang@hust.edu.cn)       | Professor, School of Life Science and Technology, Huazhong University of Science & Technology |
