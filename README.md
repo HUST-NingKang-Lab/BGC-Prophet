@@ -1,6 +1,6 @@
 # BGC-Prophet
 
-BGC-Prophet, a deep learning approach that leverages language processing neural networkmodel to accurately identify known BGCs and extrapolate novel ones. 
+BGC-Prophet, a deep learning approach that leverages language processing neural network model to accurately identify known BGCs and extrapolate novel ones. 
 
 ![Figure1](images/Figure1.svg?raw=true "Figure1")
 
@@ -25,9 +25,9 @@ BGC-Prophet is developed under the environment of Python3, and uses Pytroch to b
 
 ### BGC-Prophet Pipline
 
-BGC-Prophet can detect and classify BGCs in several genomic sequences. The process involves some steps:
+BGC-Prophet can detect and classify BGCs in several genomic sequences. The input sequence must be **in FASTA format containing Amino Acid sequences** to comply with the ESM model. If you need to input FASTA files containing nucleotide sequences, you can use [Prodigal](https://github.com/hyattpd/Prodigal) or other algorithms to convert them into protein-coding sequences. The process involves some steps:
 
-1. Utilizing the ESM2 model to extract word embeddings for each gene in the sequences.
+1. Utilizing the ESM2 model to extract word embeddings for each protein-coding gene in the sequences.
 
 2. Organizing multiple genomes and split them into gene sequences of length 128.
 
@@ -41,7 +41,7 @@ bgc_prophet pipeline --genomesDir ./pathtogenomesdirectory/ --modelPath ./pathto
  
 ```
 
-use `bgc_prophet pipline --help` command for more explanation of parameters.
+use `bgc_prophet pipeline --help` command for more explanation of parameters.
 
 
 ### Download models
@@ -59,7 +59,7 @@ wget https://github.com/HUST-NingKang-Lab/BGC-Prophet/files/12733164/model.tar.g
 
 #### Get Embedding
 
-We use ESM2-8M model to get genes' embedding vector, and the last layer output of the model is selected as the final word embedding vector for the sequences. You can use the following command:
+We use ESM2-8M model to get genes' embedding vector, so the input must be **in amino acid sequence format**, and the last layer output of the ESM model is selected as the final word embedding vector for the amino acid sequences. You can use the following command:
 
 ```shell
 bgc_prophet extract esm2_t6_8M_UR50D ./genome.fasta ./lmdb_genomes --toks_per_batch 40960 --include mean
@@ -69,7 +69,7 @@ This operation takes a gene context to be explored as input, with each gene repr
 
 If you need to obtain multiple FASTA files, you can specify the "--directory" or "-d" parameter, and the FASTA location parameter should be specified as a folder.
 
-Special amino acid symbols like "J" should be replaced with "L" or "I" manually. This operation has a minor impact on the overall generation of gene embeddings.
+**Special amino acid symbols like "J" should be replaced with "L" or "I" manually.** This operation has a minor impact on the overall generation of gene embeddings.
 
 #### Organize Genomes
 
@@ -132,6 +132,7 @@ Deciphering the Biosynthetic Potential of Microbial Genomes Using a BGC Language
 | Qilong Lai | [laiql@connect.hku.hk](mailto:laiql@connect.hku.hk)     | PhD student, Department of Computer Science, The University of Hong Kong |
 | Shuai Yao  | [yaoshuai@stu.pku.edu.cn](mailto:yaoshuai@stu.pku.edu.cn) | PhD student, Academy for Advanced interdisciplinary Studies, Peking University |
 | Yuguo Zha  | [hugozha@hust.edu.cn](mailto:hugozha@hust.edu.cn)         | PhD student, School of Life Science and Technology, Huazhong University of Science & Technology |
+| Haohong Zhang| [haohongzh@gmail.com](mailto:haohongzh@gmail.com)       | PhD student, School of Life Science and Technology, Huazhong University of Science & Technology |
 | Kang Ning  | [ningkang@hust.edu.cn](mailto:ningkang@hust.edu.cn)       | Professor, School of Life Science and Technology, Huazhong University of Science & Technology |
 
 
