@@ -10,7 +10,7 @@ BGC-Prophet, a deep learning approach that leverages language processing neural 
 Install BGC-Prophet using pip:
 
 ```shell
-pip install bgc_prophet
+pip install bgc-prophet
 ```
 
 Or you can download the offline installation package from the GitHub release page and install BGC-Prophet using the following command:
