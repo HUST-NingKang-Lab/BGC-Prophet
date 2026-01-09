@@ -16,7 +16,7 @@ pip install bgc-prophet
 Or you can download the offline installation package from the GitHub release page and install BGC-Prophet using the following command:
 
 ```shell
-pip install bgc_prophet-0.1.0-py3-none-any.whl
+pip install bgc_prophet-0.1.2-py3-none-any.whl
 ```
 
 BGC-Prophet is developed under the environment of Python3, and uses Pytroch to build the model, GPU devices are recommended to accelerate model infernece.
