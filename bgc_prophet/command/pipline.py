@@ -32,17 +32,56 @@ class piplineCommand(baseCommand):
         parser.add_argument('--classify_t', type=float, required=False, default=0.3, help='threshold for classification')
 
     def handle(self, args):
-        if args.lmdbPath is None:
-            parser_lmdb = argparse.ArgumentParser(prog="BGC-Prophet extract", description="Extract gene representations from genomes")
+        # --------- Pre-validate parameters and paths to avoid long invalid computations ---------
+        if not args.modelPath.is_file():
+            raise FileNotFoundError(f"Model file not found: {args.modelPath}")
+        if not args.classifierPath.is_file():
+            raise FileNotFoundError(f"Classifier file not found: {args.classifierPath}")
+
+        if not args.genomesDir.is_dir():
+            raise NotADirectoryError(f"Genomes directory not found: {args.genomesDir}")
+
+        genomes_files = [
+            f for f in os.listdir(args.genomesDir)
+            if f.endswith('.fasta') or f.endswith('.faa')
+        ]
+        if not genomes_files:
+            raise FileNotFoundError(
+                f"No .fasta or .faa files found in genomesDir: {args.genomesDir}"
+            )
+
+        # --------- LMDB reuse and feature extraction logic ---------
+        # If user explicitly provides lmdbPath, use it directly (avoid duplicate extraction)
+        if args.lmdbPath is not None:
+            pipline = piplineModule(args)
+            pipline.process()
+            return
+
+        # User did not provide lmdbPath, try to auto-detect default LMDB directory
+        default_lmdb = args.outputPath.joinpath('lmdb_' + args.name)
+        if default_lmdb.exists() and default_lmdb.is_dir() and any(default_lmdb.iterdir()):
+            print(f"Found existing LMDB at {default_lmdb}, reuse it and skip feature extraction.")
+            args.lmdbPath = default_lmdb
+        else:
+            # No reusable LMDB found, perform feature extraction once
+            parser_lmdb = argparse.ArgumentParser(
+                prog="BGC-Prophet extract",
+                description="Extract gene representations from genomes"
+            )
             ExtractCommand.add_arguments(ExtractCommand(), parser_lmdb)
-            for file in os.listdir(args.genomesDir):
-                if file.endswith('.fasta') or file.endswith('.faa'):
-                    file_path = args.genomesDir.joinpath(file)
-                    output_name = args.outputPath.joinpath('lmdb_' + args.name)
-                    args_lmdb = parser_lmdb.parse_args('esm2_t6_8M_UR50D {file_path} {output_name} --toks_per_batch {toksNum} --include mean'.format(
-                        file_path=file_path, output_name=output_name, toksNum=args.toks_per_batch).split())
-                    run(args_lmdb)
-            args.lmdbPath = str(args.outputPath.joinpath('lmdb_' + args.name))
+            output_name = default_lmdb
+            for file in genomes_files:
+                file_path = args.genomesDir.joinpath(file)
+                args_lmdb = parser_lmdb.parse_args(
+                    'esm2_t6_8M_UR50D {file_path} {output_name} --toks_per_batch {toksNum} --include mean'.format(
+                        file_path=file_path,
+                        output_name=output_name,
+                        toksNum=args.toks_per_batch,
+                    ).split()
+                )
+                run(args_lmdb)
+            args.lmdbPath = str(output_name)
+
         pipline = piplineModule(args)
         pipline.process()
 
@@ -115,15 +154,53 @@ if __name__ == "__main__":
     # parser.add_argument('--input', '-i', type=str, help='Input fasta file path.')
 
     args = parser.parse_args()
+
+    # Keep behavior consistent with piplineCommand.handle:
+    # 1) Validate paths first; 2) Try to reuse LMDB; 3) Perform feature extraction only when necessary.
+    if not os.path.isfile(args.modelPath):
+        raise FileNotFoundError(f"Model file not found: {args.modelPath}")
+    if not os.path.isfile(args.classifierPath):
+        raise FileNotFoundError(f"Classifier file not found: {args.classifierPath}")
+
+    if not os.path.isdir(args.genomesDir):
+        raise NotADirectoryError(f"Genomes directory not found: {args.genomesDir}")
+
+    genomes_files = [
+        f for f in os.listdir(args.genomesDir)
+        if f.endswith('.fasta') or f.endswith('.faa')
+    ]
+    if not genomes_files:
+        raise FileNotFoundError(
+            f"No .fasta or .faa files found in genomesDir: {args.genomesDir}"
+        )
+
+    # If user has provided lmdbPath, use it directly
     if args.lmdbPath is None:
-        parser_lmdb = argparse.ArgumentParser(prog="BGC-Prophet extract", description="Extract gene representations from genomes")
-        ExtractCommand.add_arguments(ExtractCommand(), parser_lmdb)
-        for file in os.listdir(args.genomesDir):
-            if file.endswith('.fasta') or file.endswith('.faa'):
-                args_lmdb = parser_lmdb.parse_args('esm2_t6_8M_UR50D {genomesDir}{filename} {outputDir}lmdb_{name} --toks_per_batch {toksNum} --include mean'.format(
-                    genomesDir=args.genomesDir, filename=file, outputDir=args.outputPath, name=args.name, toksNum=args.toks_per_batch).split())
+        default_lmdb = os.path.join(args.outputPath, 'lmdb_' + args.name)
+        if os.path.isdir(default_lmdb) and os.listdir(default_lmdb):
+            print(f"Found existing LMDB at {default_lmdb}, reuse it and skip feature extraction.")
+            args.lmdbPath = default_lmdb
+        else:
+            parser_lmdb = argparse.ArgumentParser(
+                prog="BGC-Prophet extract",
+                description="Extract gene representations from genomes"
+            )
+            ExtractCommand.add_arguments(ExtractCommand(), parser_lmdb)
+            output_name = default_lmdb
+            for file in genomes_files:
+                file_path = os.path.join(args.genomesDir, file)
+                args_lmdb = parser_lmdb.parse_args(
+                    'esm2_t6_8M_UR50D {genomesDir}{filename} {outputDir} --toks_per_batch {toksNum} --include mean'.format(
+                        genomesDir="",
+                        filename=file_path,
+                        outputDir=output_name,
+                        name=args.name,
+                        toksNum=args.toks_per_batch,
+                    ).split()
+                )
                 run(args_lmdb)
-        args.lmdbPath = args.outputPath + 'lmdb_' + args.name
+            args.lmdbPath = output_name
+
     pipline = piplineModule(args)
     pipline.process()
 
